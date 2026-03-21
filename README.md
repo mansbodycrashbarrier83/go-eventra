@@ -9,8 +9,6 @@ Eventra is a production-oriented authentication platform built with Go and Postg
 [![Frontend CI](https://img.shields.io/github/actions/workflow/status/CodeByPinar/go-eventra/ci-frontend.yml?branch=main&style=for-the-badge&label=Frontend%20CI)](https://github.com/CodeByPinar/go-eventra/actions/workflows/ci-frontend.yml)
 [![License](https://img.shields.io/badge/License-Unspecified-6B7280?style=for-the-badge&logo=bookstack&logoColor=white)](README.md#license)
 
-![Eventra Thumbnail](docs/assets/eventra-thumbnail.svg)
-
 ## Table of Contents
 
 - [What This Project Includes](#what-this-project-includes)
