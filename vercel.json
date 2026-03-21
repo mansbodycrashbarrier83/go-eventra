@@ -6,6 +6,10 @@
   },
   "routes": [
     {
+      "src": "^/$",
+      "dest": "api/index.go"
+    },
+    {
       "src": "/health",
       "dest": "api/index.go"
     },

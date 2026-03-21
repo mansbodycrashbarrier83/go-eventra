@@ -31,6 +31,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
     return
   }
 
+  if r.URL.Path == "/" {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    _ = json.NewEncoder(w).Encode(map[string]any{
+      "service": "eventra-auth",
+      "status":  "ok",
+      "routes": []string{
+        "GET /health",
+        "POST /api/v1/auth/register",
+        "POST /api/v1/auth/login",
+        "POST /api/v1/auth/refresh",
+        "POST /api/v1/auth/logout",
+        "GET /api/v1/auth/me",
+      },
+    })
+    return
+  }
+
   initOnce.Do(func() {
     router, initErr = bootstrap.NewHTTPHandler(context.Background())
   })
