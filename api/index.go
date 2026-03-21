@@ -54,10 +54,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
   })
 
   if initErr != nil {
+    reason := "internal"
+    errText := strings.ToLower(initErr.Error())
+    if strings.Contains(errText, "load config") {
+      reason = "config"
+    } else if strings.Contains(errText, "connect database") || strings.Contains(errText, "postgres") {
+      reason = "database"
+    }
+
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusInternalServerError)
-    _ = json.NewEncoder(w).Encode(map[string]string{
-      "error": "backend initialization failed",
+    _ = json.NewEncoder(w).Encode(map[string]any{
+      "error":  "backend initialization failed",
+      "reason": reason,
     })
     return
   }
