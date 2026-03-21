@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "api/index.go": {
+      "maxDuration": 15
+    }
+  },
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "api/index.go"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.go"
+    }
+  ]
+}
